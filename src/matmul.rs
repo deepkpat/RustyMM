@@ -172,3 +172,131 @@ pub fn matmul_transposed_simd(a: &[f32], bt: &[f32], c: &mut [f32], n: usize) {
         }
     }
 }
+
+#[target_feature(enable = "avx2,fma")]
+unsafe fn dot_product_avx2_chunked(a: &[f32], b: &[f32], start: usize, end: usize) -> f32 {
+    let mut sum = _mm256_setzero_ps();
+
+    let mut k = start;
+
+    while k + 8 <= end {
+        let va = _mm256_loadu_ps(a.as_ptr().add(k));
+
+        let vb = _mm256_loadu_ps(b.as_ptr().add(k));
+
+        sum = _mm256_fmadd_ps(va, vb, sum);
+
+        k += 8;
+    }
+
+    let mut temp = [0.0f32; 8];
+
+    _mm256_storeu_ps(temp.as_mut_ptr(), sum);
+
+    let mut result = temp.iter().sum::<f32>();
+
+    while k < end {
+        result += a[k] * b[k];
+        k += 1;
+    }
+
+    result
+}
+
+pub fn matmul_blocked_transposed_simd(a: &[f32], bt: &[f32], c: &mut [f32], n: usize) {
+    for ii in (0..n).step_by(BS) {
+        for jj in (0..n).step_by(BS) {
+            for kk in (0..n).step_by(BS) {
+                let k_end = (kk + BS).min(n);
+
+                for i in ii..(ii + BS).min(n) {
+                    let row_a = &a[i * n..(i + 1) * n];
+
+                    for j in jj..(jj + BS).min(n) {
+                        let row_bt = &bt[j * n..(j + 1) * n];
+
+                        let partial = unsafe { dot_product_avx2_chunked(row_a, row_bt, kk, k_end) };
+
+                        c[i * n + j] += partial;
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[target_feature(enable = "avx2,fma")]
+unsafe fn microkernel_1x8(a: &[f32], b: &[f32], c: &mut [f32], n: usize, i: usize, j: usize) {
+    // accumulator for 8 output values
+    let mut acc = _mm256_setzero_ps();
+
+    for k in 0..n {
+        // broadcast A[i,k] into all 8 lanes
+        let a_scalar = _mm256_set1_ps(a[i * n + k]);
+
+        // load 8 contiguous B values
+        let b_vec = _mm256_loadu_ps(b.as_ptr().add(k * n + j));
+
+        // fused multiply-add
+        acc = _mm256_fmadd_ps(a_scalar, b_vec, acc);
+    }
+
+    // store results
+    _mm256_storeu_ps(c.as_mut_ptr().add(i * n + j), acc);
+}
+
+pub fn matmul_microkernel_1x8(a: &[f32], b: &[f32], c: &mut [f32], n: usize) {
+    for i in 0..n {
+        // step by 8 columns
+        for j in (0..n).step_by(8) {
+            unsafe {
+                microkernel_1x8(a, b, c, n, i, j);
+            }
+        }
+    }
+}
+
+#[target_feature(enable = "avx2,fma")]
+unsafe fn microkernel_4x8(a: &[f32], b: &[f32], c: &mut [f32], n: usize, i: usize, j: usize) {
+    // 4 accumulators
+    let mut acc0 = _mm256_setzero_ps();
+    let mut acc1 = _mm256_setzero_ps();
+    let mut acc2 = _mm256_setzero_ps();
+    let mut acc3 = _mm256_setzero_ps();
+
+    for k in 0..n {
+        // load B vector once
+        let b_vec = _mm256_loadu_ps(b.as_ptr().add(k * n + j));
+
+        // broadcast A scalars
+        let a0 = _mm256_set1_ps(a[(i + 0) * n + k]);
+        let a1 = _mm256_set1_ps(a[(i + 1) * n + k]);
+        let a2 = _mm256_set1_ps(a[(i + 2) * n + k]);
+        let a3 = _mm256_set1_ps(a[(i + 3) * n + k]);
+
+        // fused multiply-add
+        acc0 = _mm256_fmadd_ps(a0, b_vec, acc0);
+        acc1 = _mm256_fmadd_ps(a1, b_vec, acc1);
+        acc2 = _mm256_fmadd_ps(a2, b_vec, acc2);
+        acc3 = _mm256_fmadd_ps(a3, b_vec, acc3);
+    }
+
+    // store results
+    _mm256_storeu_ps(c.as_mut_ptr().add((i + 0) * n + j), acc0);
+
+    _mm256_storeu_ps(c.as_mut_ptr().add((i + 1) * n + j), acc1);
+
+    _mm256_storeu_ps(c.as_mut_ptr().add((i + 2) * n + j), acc2);
+
+    _mm256_storeu_ps(c.as_mut_ptr().add((i + 3) * n + j), acc3);
+}
+
+pub fn matmul_microkernel_4x8(a: &[f32], b: &[f32], c: &mut [f32], n: usize) {
+    for i in (0..n).step_by(4) {
+        for j in (0..n).step_by(8) {
+            unsafe {
+                microkernel_4x8(a, b, c, n, i, j);
+            }
+        }
+    }
+}

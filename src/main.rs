@@ -65,6 +65,21 @@ fn main() {
         matmul::matmul_transposed_simd(&a, &bt, &mut c, n);
     });
 
+    c.fill(0.0f32);
+    benchmark("blocked_trans_simd", || {
+        matmul::matmul_blocked_transposed_simd(&a, &bt, &mut c, n);
+    });
+
+    c.fill(0.0f32);
+    benchmark("microkernel_1x8", || {
+        matmul::matmul_microkernel_1x8(&a, &b, &mut c, n);
+    });
+
+    c.fill(0.0f32);
+    benchmark("microkernel_4x8", || {
+        matmul::matmul_microkernel_4x8(&a, &b, &mut c, n);
+    });
+
     println!("\nn: {n}");
     println!("batch_size: {}", matmul::get_batch_size());
     println!("first element: {}", c[0]);
