@@ -20,7 +20,7 @@ where
 fn main() {
     println!("matrix multiplication optimizations!");
 
-    let n = 1024;
+    let n = 512;
 
     let a = vec![1.0f32; n * n];
     let b = vec![1.0f32; n * n];
@@ -60,5 +60,11 @@ fn main() {
         matmul::matmul_blocked_parallel(&a, &b, &mut c, n);
     });
 
-    println!("\nfirst element: {}", c[0]);
+    c.fill(0.0f32);
+    benchmark("transposed_simd", || {
+        matmul::matmul_transposed_simd(&a, &b, &mut c, n);
+    });
+
+    println!("\nn: {n}");
+    println!("first element: {}", c[0]);
 }
