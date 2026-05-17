@@ -36,5 +36,10 @@ fn main() {
         matmul::matmul_naive(&a, &b, &mut c, n);
     });
 
+    c.fill(0.0f32);
+    benchmark("reordered", n, || {
+        matmul::matmul_reordered(&a, &b, &mut c, n);
+    });
+
     println!("first element: {}", c[0]);
 }
