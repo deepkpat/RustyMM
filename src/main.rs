@@ -25,9 +25,14 @@ fn main() {
     let a = vec![1.0f32; n * n];
     let b = vec![1.0f32; n * n];
 
+    let mut bt = vec![0.0f32; n * n];
+    matmul::transpose(&b, &mut bt, n);
+
     let mut c1 = vec![0.0f32; n * n];
     let mut c2 = vec![0.0f32; n * n];
     let mut c3 = vec![0.0f32; n * n];
+    let mut c4 = vec![0.0f32; n * n];
+    let mut c5 = vec![0.0f32; n * n];
 
     benchmark("naive", || {
         matmul::matmul_naive(&a, &b, &mut c1, n);
@@ -41,8 +46,18 @@ fn main() {
         matmul::matmul_blocked(&a, &b, &mut c3, n);
     });
 
+    benchmark("transposed", || {
+        matmul::matmul_transposed(&a, &bt, &mut c4, n);
+    });
+
+    benchmark("blk+trans", || {
+        matmul::matmul_blocked_transposed(&a, &bt, &mut c5, n);
+    });
+
     println!("\nfirst elements");
     dbg!(c1[0]);
     dbg!(c2[0]);
     dbg!(c3[0]);
+    dbg!(c4[0]);
+    dbg!(c5[0]);
 }
