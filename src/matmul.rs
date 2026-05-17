@@ -1,3 +1,7 @@
+use rayon::iter::IndexedParallelIterator;
+use rayon::iter::ParallelIterator;
+use rayon::slice::ParallelSliceMut;
+
 pub fn matmul_naive(a: &[f32], b: &[f32], c: &mut [f32], n: usize) {
     for i in 0..n {
         for j in 0..n {
@@ -24,7 +28,7 @@ pub fn matmul_reordered(a: &[f32], b: &[f32], c: &mut [f32], n: usize) {
     }
 }
 
-const BS: usize = 16;
+const BS: usize = 32;
 
 pub fn matmul_blocked(a: &[f32], b: &[f32], c: &mut [f32], n: usize) {
     for ii in (0..n).step_by(BS) {
@@ -85,4 +89,30 @@ pub fn matmul_blocked_transposed(a: &[f32], bt: &[f32], c: &mut [f32], n: usize)
             }
         }
     }
+}
+
+pub fn matmul_blocked_parallel(a: &[f32], b: &[f32], c: &mut [f32], n: usize) {
+    c.par_chunks_mut(BS * n)
+        .enumerate()
+        .for_each(|(block_idx, c_chunk)| {
+            let ii = block_idx * BS;
+
+            let row_count = (n - ii).min(BS);
+
+            for kk in (0..n).step_by(BS) {
+                for jj in (0..n).step_by(BS) {
+                    for i_local in 0..row_count {
+                        let i = ii + i_local;
+
+                        for k in kk..(kk + BS).min(n) {
+                            let a_i_k = a[i * n + k];
+
+                            for j in jj..(jj + BS).min(n) {
+                                c_chunk[i_local * n + j] += a_i_k * b[k * n + j];
+                            }
+                        }
+                    }
+                }
+            }
+        });
 }

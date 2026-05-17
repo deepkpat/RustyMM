@@ -14,7 +14,7 @@ where
 
     let ms = elapsed.as_secs_f64() * 1000.0;
 
-    println!("{:<15} {:>15.5?} ms", name, ms);
+    println!("{:<20} {:>16.5?} ms", name, ms);
 }
 
 fn main() {
@@ -33,6 +33,7 @@ fn main() {
     let mut c3 = vec![0.0f32; n * n];
     let mut c4 = vec![0.0f32; n * n];
     let mut c5 = vec![0.0f32; n * n];
+    let mut c6 = vec![0.0f32; n * n];
 
     benchmark("naive", || {
         matmul::matmul_naive(&a, &b, &mut c1, n);
@@ -50,8 +51,12 @@ fn main() {
         matmul::matmul_transposed(&a, &bt, &mut c4, n);
     });
 
-    benchmark("blk+trans", || {
+    benchmark("blocked_transposed", || {
         matmul::matmul_blocked_transposed(&a, &bt, &mut c5, n);
+    });
+
+    benchmark("parallel", || {
+        matmul::matmul_blocked_parallel(&a, &b, &mut c6, n);
     });
 
     println!("\nfirst elements");
@@ -60,4 +65,5 @@ fn main() {
     dbg!(c3[0]);
     dbg!(c4[0]);
     dbg!(c5[0]);
+    dbg!(c6[0]);
 }
