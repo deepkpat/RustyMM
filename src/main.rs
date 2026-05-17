@@ -51,6 +51,11 @@ fn main() {
         matmul::matmul_parallel(&a, &b, &mut c, n);
     });
 
+    c.fill(0.0f32);
+    benchmark("tiled_parallel", n, || {
+        matmul::matmul_tiled_parallel(&a, &b, &mut c, n, 32);
+    });
+
     println!("\nn: {n}");
     println!("threads: {}", rayon::current_num_threads());
     println!("first element: {}", c[0]);
