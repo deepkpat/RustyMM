@@ -42,8 +42,8 @@ fn main() {
     });
 
     c.fill(0.0f32);
-    benchmark("tilled", n, || {
-        matmul::matmul_tilled(&a, &b, &mut c, n, 32);
+    benchmark("tiled", n, || {
+        matmul::matmul_tiled(&a, &b, &mut c, n, 32);
     });
 
     c.fill(0.0f32);

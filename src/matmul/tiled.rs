@@ -1,4 +1,4 @@
-pub fn matmul_tilled(a: &[f32], b: &[f32], c: &mut [f32], n: usize, block_size: usize) {
+pub fn matmul_tiled(a: &[f32], b: &[f32], c: &mut [f32], n: usize, block_size: usize) {
     for ii in (0..n).step_by(block_size) {
         for kk in (0..n).step_by(block_size) {
             for jj in (0..n).step_by(block_size) {
