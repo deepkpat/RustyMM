@@ -62,9 +62,10 @@ fn main() {
 
     c.fill(0.0f32);
     benchmark("transposed_simd", || {
-        matmul::matmul_transposed_simd(&a, &b, &mut c, n);
+        matmul::matmul_transposed_simd(&a, &bt, &mut c, n);
     });
 
     println!("\nn: {n}");
+    println!("batch_size: {}", matmul::get_batch_size());
     println!("first element: {}", c[0]);
 }

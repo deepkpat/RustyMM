@@ -31,6 +31,10 @@ pub fn matmul_reordered(a: &[f32], b: &[f32], c: &mut [f32], n: usize) {
 
 const BS: usize = 32;
 
+pub fn get_batch_size() -> usize {
+    BS
+}
+
 pub fn matmul_blocked(a: &[f32], b: &[f32], c: &mut [f32], n: usize) {
     for ii in (0..n).step_by(BS) {
         for kk in (0..n).step_by(BS) {
