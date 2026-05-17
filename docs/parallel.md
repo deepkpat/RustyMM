@@ -31,22 +31,3 @@ pub fn matmul_parallel(a: &[f32], b: &[f32], c: &mut [f32], n: usize) {
     });
 }
 ```
-
----
-
-## Sample Runs
-
-execution time (in ms)
-
-`n = 1024, threads = 16`
-
-1. 91.161
-2. 94.168
-3. 99.633
-4. 93.466
-5. 93.109
-6. 100.683
-7. 102.778
-8. 92.684
-
-mean: 95.960

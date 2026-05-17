@@ -1,7 +1,5 @@
 ## Tiled Parallel
 
-<!-- add a paragraph here -->
-
 tiled parallel combines the benefits of tiling and parallelization.
 
 like tiling, it breaks the matrices into small blocks to improve cache reuse, reducing memory bandwidth pressure.
@@ -21,7 +19,7 @@ execution time (in ms) is similar to tiling or parallel alone, with a mean of ~1
 
 ## Code
 
-we assume that `c` will be only contain zeros.
+we assume that `c` is a zero vector.
 
 ```rust
 use rayon::iter::{IndexedParallelIterator, ParallelIterator};
@@ -53,26 +51,3 @@ pub fn matmul_tiled_parallel(a: &[f32], b: &[f32], c: &mut [f32], n: usize, bloc
         });
 }
 ```
-
----
-
-## Sample Runs
-
-execution time (in ms)
-
-`n = 1024, threads = 16, block_size = 32`
-
-1. 148.770
-2. 148.577
-3. 150.846
-4. 147.893
-5. 148.808
-6. 142.643
-7. 165.344
-8. 163.826
-
-mean: 152.088
-
-with `threads = 4` mean is around 245 ms
-
-with `threads = 8` mean is around 145 ms

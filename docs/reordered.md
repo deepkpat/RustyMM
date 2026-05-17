@@ -14,7 +14,7 @@ this single change accounts for ~40x speed up (6880ms to 170ms on `n = 1024`).
 
 ## Code
 
-we assume that `c` will be only contain zeros.
+we assume that `c` is a zero vector.
 
 ```rust
 pub fn matmul_reordered(a: &[f32], b: &[f32], c: &mut [f32], n: usize) {
@@ -29,22 +29,3 @@ pub fn matmul_reordered(a: &[f32], b: &[f32], c: &mut [f32], n: usize) {
     }
 }
 ```
-
----
-
-## Sample Runs
-
-execution time (in ms)
-
-`n = 1024`
-
-1. 170.553
-2. 166.759
-3. 183.363
-4. 174.734
-5. 169.448
-6. 169.448
-7. 192.381
-8. 163.974
-
-mean: 173.833

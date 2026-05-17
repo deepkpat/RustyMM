@@ -17,10 +17,10 @@ with `block_size = 32`, this reduces runtime from ~174ms to ~78ms on `n = 1024`.
 
 ## Code
 
-we assume that `c` will be only contain zeros.
+we assume that `c` is a zero vector.
 
 ```rust
-pub fn matmul_tiling(a: &[f32], b: &[f32], c: &mut [f32], n: usize, block_size: usize) {
+pub fn matmul_tiled(a: &[f32], b: &[f32], c: &mut [f32], n: usize, block_size: usize) {
     for ii in (0..n).step_by(block_size) {
         for kk in (0..n).step_by(block_size) {
             for jj in (0..n).step_by(block_size) {
@@ -40,21 +40,6 @@ pub fn matmul_tiling(a: &[f32], b: &[f32], c: &mut [f32], n: usize, block_size: 
 }
 ```
 
----
+--- 
 
-## Sample Runs
-
-execution time (in ms)
-
-`n = 1024, block_size = 32`
-
-1. 78.741
-2. 76.849
-3. 79.694
-4. 79.808
-5. 79.648
-6. 75.432
-7. 76.992
-8. 74.641
-
-mean: 77.726
+## Fine-Tuning
