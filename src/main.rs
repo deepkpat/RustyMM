@@ -2,9 +2,9 @@ use std::time::Instant;
 
 mod matmul;
 
-fn benchmark<F>(name: &str, f: F)
+fn benchmark<F>(name: &str, mut f: F)
 where
-    F: FnOnce(),
+    F: FnMut(),
 {
     let start = Instant::now();
 
@@ -28,42 +28,37 @@ fn main() {
     let mut bt = vec![0.0f32; n * n];
     matmul::transpose(&b, &mut bt, n);
 
-    let mut c1 = vec![0.0f32; n * n];
-    let mut c2 = vec![0.0f32; n * n];
-    let mut c3 = vec![0.0f32; n * n];
-    let mut c4 = vec![0.0f32; n * n];
-    let mut c5 = vec![0.0f32; n * n];
-    let mut c6 = vec![0.0f32; n * n];
+    let mut c = vec![0.0f32; n * n];
 
+    c.fill(0.0f32);
     benchmark("naive", || {
-        matmul::matmul_naive(&a, &b, &mut c1, n);
+        matmul::matmul_naive(&a, &b, &mut c, n);
     });
 
+    c.fill(0.0f32);
     benchmark("reordered", || {
-        matmul::matmul_reordered(&a, &b, &mut c2, n);
+        matmul::matmul_reordered(&a, &b, &mut c, n);
     });
 
+    c.fill(0.0f32);
     benchmark("blocked", || {
-        matmul::matmul_blocked(&a, &b, &mut c3, n);
+        matmul::matmul_blocked(&a, &b, &mut c, n);
     });
 
+    c.fill(0.0f32);
     benchmark("transposed", || {
-        matmul::matmul_transposed(&a, &bt, &mut c4, n);
+        matmul::matmul_transposed(&a, &bt, &mut c, n);
     });
 
+    c.fill(0.0f32);
     benchmark("blocked_transposed", || {
-        matmul::matmul_blocked_transposed(&a, &bt, &mut c5, n);
+        matmul::matmul_blocked_transposed(&a, &bt, &mut c, n);
     });
 
+    c.fill(0.0f32);
     benchmark("parallel", || {
-        matmul::matmul_blocked_parallel(&a, &b, &mut c6, n);
+        matmul::matmul_blocked_parallel(&a, &b, &mut c, n);
     });
 
-    println!("\nfirst elements");
-    dbg!(c1[0]);
-    dbg!(c2[0]);
-    dbg!(c3[0]);
-    dbg!(c4[0]);
-    dbg!(c5[0]);
-    dbg!(c6[0]);
+    println!("\nfirst element: {}", c[0]);
 }
