@@ -41,5 +41,10 @@ fn main() {
         matmul::matmul_reordered(&a, &b, &mut c, n);
     });
 
-    println!("first element: {}", c[0]);
+    c.fill(0.0f32);
+    benchmark("tilled", n, || {
+        matmul::matmul_tilled(&a, &b, &mut c, n, 32);
+    });
+
+    println!("\nfirst element: {}", c[0]);
 }
