@@ -139,6 +139,11 @@ fn main() {
             "tiled-parallel-128",
             Box::new(|c, n, a, b| matmul::matmul_tiled_parallel(a, b, c, n, 128)),
         ),
+        // tiled-packed
+        (
+            "tiled-packed",
+            Box::new(|c, n, a, b| matmul::matmul_tiled_packed(a, b, c, n)),
+        ),
     ];
 
     let order: Vec<usize> = (0..kernels.len()).collect();
