@@ -4,8 +4,8 @@ use crate::matmul::matmul_naive;
 
 mod matmul;
 
-const WARMUP_ITERS: usize = 4;
-const MEASURE_ITERS: usize = 16;
+const WARMUP_ITERS: usize = 2;
+const MEASURE_ITERS: usize = 8;
 
 fn flops(n: usize) -> f64 {
     2.0 * (n as f64).powi(3)
@@ -65,7 +65,7 @@ where
 fn main() {
     println!("matrix multiplication optimizations (GEMM benchmark)\n");
 
-    let n = 1024;
+    let n = 1024 * 4;
 
     let a = vec![1.0f32; n * n];
     let b = vec![1.0f32; n * n];
@@ -159,9 +159,70 @@ fn main() {
             "register-direct",
             Box::new(|c, n, a, b| matmul::matmul_register_direct(a, b, c, n)),
         ),
+        // amortized-packed
+        (
+            "amortized-packed",
+            Box::new(|c, n, a, b| matmul::matmul_amortized_packed(a, b, c, n)),
+        ),
+        // parallel-packed
+        (
+            "parallel-packed",
+            Box::new(|c, n, a, b| matmul::matmul_parallel_packed(a, b, c, n)),
+        ),
+        // register-scale
+        (
+            "register-scale",
+            Box::new(|c, n, a, b| matmul::matmul_register_scale(a, b, c, n)),
+        ),
+        (
+            "pipeline-unroll",
+            Box::new(|c, n, a, b| matmul::matmul_pipeline_unroll(a, b, c, n)),
+        ),
+        (
+            "parallel-pack-scale",
+            Box::new(|c, n, a, b| matmul::matmul_parallel_pack_scale(a, b, c, n)),
+        ),
+        (
+            "cache-tuned-64",
+            Box::new(|c, n, a, b| matmul::matmul_cache_tuned(a, b, c, n)),
+        ),
+        (
+            "register-16-4x16",
+            Box::new(|c, n, a, b| matmul::matmul_register_16(a, b, c, n)),
+        ),
+        (
+            "jit-ultimate-4x16",
+            Box::new(|c, n, a, b| matmul::matmul_jit_ultimate(a, b, c, n)),
+        ),
+        (
+            "prefetched-ultimate",
+            Box::new(|c, n, a, b| matmul::matmul_prefetched_ultimate(a, b, c, n)),
+        ),
+        (
+            "aligned-avx",
+            Box::new(|c, n, a, b| matmul::matmul_aligned_avx(a, b, c, n)),
+        ),
+        (
+            "pipelined-avx",
+            Box::new(|c, n, a, b| matmul::matmul_pipelined_avx(a, b, c, n)),
+        ),
+        (
+            "blas-blocked-64",
+            Box::new(|c, n, a, b| matmul::matmul_blas_blocked(a, b, c, n)),
+        ),
     ];
 
-    let order: Vec<usize> = (0..kernels.len()).collect();
+    // let order: Vec<usize> = (0..kernels.len()).collect();
+    let n_kernels = kernels.len();
+    let order = [
+        // n_kernels - 8,
+        // n_kernels - 6,
+        n_kernels - 5,
+        // n_kernels - 4,
+        n_kernels - 3,
+        // n_kernels - 2,
+        n_kernels - 1,
+    ];
     for &i in &order {
         let (name, kernel) = &mut kernels[i];
 

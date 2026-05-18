@@ -11,8 +11,6 @@ on to the next region of memory.
 
 this increases temporal locality: once a block is loaded into cache, many multiplications are performed using that same data before it is discarded. as a result, memory bandwidth pressure drops significantly and the cpu spends more time doing arithmetic instead of waiting on memory.
 
-with `block_size = 32`, this reduces runtime from ~174ms to ~78ms on `n = 1024`.
-
 ---
 
 ## Code
@@ -39,7 +37,3 @@ pub fn matmul_tiled(a: &[f32], b: &[f32], c: &mut [f32], n: usize, block_size: u
     }
 }
 ```
-
---- 
-
-## Fine-Tuning

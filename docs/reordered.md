@@ -2,13 +2,11 @@
 
 by reordering the loops from `i, j, k` to `i, k, j`, we imporve *cache locality*.
 
-in the naive version, the inner `k` loop accesses `b[k * n + j]` with a stride of `n`, which evicts cache lines on every 
-iteration.
+in the naive version, the inner `k` loop accesses `b[k * n + j]` with a stride of `n`, which evicts cache lines on 
+every iteration.
 
-wrapping `j` and `k` makes `j` the innermost loop, so `b[k * n + j]` is accessed sequentially in memory, fully utilizing
-the cpu's cache line.
-
-this single change accounts for ~40x speed up (6880ms to 170ms on `n = 1024`).
+wrapping `j` and `k` makes `j` the innermost loop, so `b[k * n + j]` is accessed sequentially in memory, fully 
+utilizing the cpu's cache line.
 
 ---
 
