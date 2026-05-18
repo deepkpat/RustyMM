@@ -144,6 +144,11 @@ fn main() {
             "tiled-packed",
             Box::new(|c, n, a, b| matmul::matmul_tiled_packed(a, b, c, n)),
         ),
+        // tiled-simd
+        (
+            "tiled-simd",
+            Box::new(|c, n, a, b| matmul::matmul_tiled_simd(a, b, c, n)),
+        ),
     ];
 
     let order: Vec<usize> = (0..kernels.len()).collect();
