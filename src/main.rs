@@ -149,6 +149,11 @@ fn main() {
             "tiled-simd",
             Box::new(|c, n, a, b| matmul::matmul_tiled_simd(a, b, c, n)),
         ),
+        // tiled-register
+        (
+            "tiled-register",
+            Box::new(|c, n, a, b| matmul::matmul_tiled_register(a, b, c, n)),
+        ),
     ];
 
     let order: Vec<usize> = (0..kernels.len()).collect();
