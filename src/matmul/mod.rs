@@ -1,5 +1,6 @@
 mod naive;
 mod parallel;
+mod register_direct;
 mod reordered;
 mod tiled;
 mod tiled_packed;
@@ -9,6 +10,7 @@ mod tiled_simd;
 
 pub use naive::matmul_naive;
 pub use parallel::matmul_parallel;
+pub use register_direct::matmul_register_direct;
 pub use reordered::matmul_reordered;
 pub use tiled::matmul_tiled;
 pub use tiled_packed::matmul_tiled_packed;

@@ -154,6 +154,11 @@ fn main() {
             "tiled-register",
             Box::new(|c, n, a, b| matmul::matmul_tiled_register(a, b, c, n)),
         ),
+        // register-direct
+        (
+            "register-direct",
+            Box::new(|c, n, a, b| matmul::matmul_register_direct(a, b, c, n)),
+        ),
     ];
 
     let order: Vec<usize> = (0..kernels.len()).collect();
